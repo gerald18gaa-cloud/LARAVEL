@@ -16,6 +16,8 @@ class Member extends Model
         'email',
         'phone',
         'address',
+        'latitude',
+        'longitude',
         'birth_date',
         'membership_category_id',
         'membership_level_id',
@@ -26,6 +28,8 @@ class Member extends Model
     protected $casts = [
         'birth_date' => 'date',
         'registered_at' => 'date',
+        'latitude' => 'decimal:7',
+        'longitude' => 'decimal:7',
     ];
 
     public function category()

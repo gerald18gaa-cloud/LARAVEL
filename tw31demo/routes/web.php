@@ -8,6 +8,7 @@ use App\Http\Controllers\LevelController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\WeatherController;
 
 Route::get('/login', [AuthController::class, 'showLogin'])
     ->name('login');
@@ -21,6 +22,9 @@ Route::post('/logout', [AuthController::class, 'logout'])
 Route::middleware('auth')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])
         ->name('dashboard');
+
+    Route::get('/weather', [WeatherController::class, 'show'])
+        ->name('weather.show');
 
     Route::resource('categories', CategoryController::class);
 

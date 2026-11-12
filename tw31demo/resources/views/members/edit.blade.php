@@ -108,6 +108,38 @@
                 @enderror
             </div>
 
+            <div class="form-group map-section">
+                <label>Update Location on Map</label>
+
+                <div id="map"></div>
+
+                <input
+                    type="hidden"
+                    id="latitude"
+                    name="latitude"
+                    value="{{ old('latitude', $member->latitude ?? '14.5995') }}"
+                >
+
+                <input
+                    type="hidden"
+                    id="longitude"
+                    name="longitude"
+                    value="{{ old('longitude', $member->longitude ?? '120.9842') }}"
+                >
+
+                <p id="coordinates" class="map-help">
+                    Click or drag the marker to update the location.
+                </p>
+
+                @error('latitude')
+                    <div class="error-text">{{ $message }}</div>
+                @enderror
+
+                @error('longitude')
+                    <div class="error-text">{{ $message }}</div>
+                @enderror
+            </div>
+
             <div class="grid">
                 <div class="form-group">
                     <label for="birth_date">Birth Date</label>
@@ -246,4 +278,107 @@
             </button>
         </form>
     </div>
+
+    <style>
+        .map-section {
+            margin-top: 20px;
+        }
+
+        #map {
+            width: 100%;
+            height: 330px;
+            margin-top: 8px;
+            border: 1px solid #dbe4ea;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .map-help {
+            margin: 8px 0 0;
+            color: #64748b;
+            font-size: 13px;
+        }
+    </style>
+
+    <script>
+        let map;
+        let marker;
+
+        function initMap() {
+            const latitude = Number(
+                document.getElementById('latitude').value
+            );
+
+            const longitude = Number(
+                document.getElementById('longitude').value
+            );
+
+            const location = {
+                lat: latitude,
+                lng: longitude
+            };
+
+            map = new google.maps.Map(
+                document.getElementById('map'),
+                {
+                    center: location,
+                    zoom: 13,
+                    mapTypeControl: false,
+                    streetViewControl: false,
+                    fullscreenControl: true
+                }
+            );
+
+            marker = new google.maps.Marker({
+                position: location,
+                map: map,
+                draggable: true
+            });
+
+            map.addListener('click', function (event) {
+                updateLocation(
+                    event.latLng.lat(),
+                    event.latLng.lng()
+                );
+            });
+
+            marker.addListener('dragend', function (event) {
+                updateLocation(
+                    event.latLng.lat(),
+                    event.latLng.lng()
+                );
+            });
+
+            updateCoordinates(latitude, longitude);
+        }
+
+        function updateLocation(latitude, longitude) {
+            marker.setPosition({
+                lat: latitude,
+                lng: longitude
+            });
+
+            document.getElementById('latitude').value =
+                latitude.toFixed(7);
+
+            document.getElementById('longitude').value =
+                longitude.toFixed(7);
+
+            updateCoordinates(latitude, longitude);
+        }
+
+        function updateCoordinates(latitude, longitude) {
+            document.getElementById('coordinates').textContent =
+                'Latitude: ' + latitude.toFixed(6) +
+                ', Longitude: ' + longitude.toFixed(6);
+        }
+
+        window.initMap = initMap;
+    </script>
+
+    <script
+        async
+        defer
+        src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.key') }}&callback=initMap">
+    </script>
 @endsection

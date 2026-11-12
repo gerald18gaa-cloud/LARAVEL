@@ -63,8 +63,23 @@
 
         <div class="full-width">
             <span class="detail-label">Address</span>
-            <strong>{{ $member->address ?: 'No address provided' }}</strong>
+            <strong>
+                {{ $member->address ?: 'No address provided' }}
+            </strong>
         </div>
+
+        @if ($member->latitude !== null && $member->longitude !== null)
+        <div class="full-width location-section">
+            <span class="detail-label">Member Location</span>
+
+            <div id="profile-map"></div>
+
+            <p class="map-coordinates">
+                Latitude: {{ $member->latitude }},
+                Longitude: {{ $member->longitude }}
+            </p>
+        </div>
+        @endif
     </div>
 
     <div class="profile-actions">
@@ -114,7 +129,9 @@
                         </strong>
                     </td>
 
-                    <td>{{ $transaction->transaction_type }}</td>
+                    <td>
+                        {{ $transaction->transaction_type }}
+                    </td>
 
                     <td>{{ $transaction->level->name }}</td>
 
@@ -123,7 +140,8 @@
                     </td>
 
                     <td>
-                        <span class="status-badge status-{{ strtolower($transaction->status) }}">
+                        <span
+                            class="status-badge status-{{ strtolower($transaction->status) }}">
                             {{ $transaction->status }}
                         </span>
                     </td>
@@ -210,6 +228,25 @@
         grid-column: 1 / -1;
     }
 
+    .location-section {
+        margin-top: 4px;
+    }
+
+    #profile-map {
+        width: 100%;
+        height: 300px;
+        margin-top: 10px;
+        border: 1px solid #dbe4ea;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .map-coordinates {
+        margin: 8px 0 0;
+        color: #64748b;
+        font-size: 13px;
+    }
+
     .profile-actions {
         display: flex;
         flex-wrap: wrap;
@@ -289,12 +326,6 @@
         color: #64748b;
     }
 
-    @media (max-width: 900px) {
-        .details-grid {
-            gap: 20px;
-        }
-    }
-
     @media (max-width: 650px) {
         .profile-header {
             align-items: flex-start;
@@ -317,10 +348,42 @@
         .profile-actions .btn {
             width: 100%;
         }
-
-        .empty-state {
-            padding: 30px 10px;
-        }
     }
 </style>
+
+@if ($member->latitude !== null && $member->longitude !== null)
+<script>
+    window.initProfileMap = function() {
+        const location = {
+            lat: Number('{{ $member->latitude }}'),
+            lng: Number('{{ $member->longitude }}')
+        };
+        const mapElement = document.getElementById('profile-map');
+
+        if (!mapElement) {
+            return;
+        }
+
+        const map = new google.maps.Map(mapElement, {
+            center: location,
+            zoom: 14,
+            mapTypeControl: false,
+            streetViewControl: false,
+            fullscreenControl: true
+        });
+
+        new google.maps.Marker({
+            position: location,
+            map: map
+        });
+    };
+</script>
+
+<script
+    async
+    defer
+    src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.key') }}&callback=initProfileMap">
+</script>
+@endif
+
 @endsection

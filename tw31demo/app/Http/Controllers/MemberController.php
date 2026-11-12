@@ -5,28 +5,24 @@ namespace App\Http\Controllers;
 use App\Models\Member;
 use App\Models\MembershipCategory;
 use App\Models\MembershipLevel;
+use App\Notifications\MemberRegisteredNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Validator;
 
 class MemberController extends Controller
 {
     public function index(Request $request)
     {
         $filters = $request->validate([
-            'search' => [
-                'nullable',
-                'string',
-                'max:100',
-            ],
-
+            'search' => ['nullable', 'string', 'max:100'],
             'category' => [
                 'nullable',
                 'integer',
                 'exists:membership_categories,id',
             ],
-
             'level' => [
                 'nullable',
                 'integer',
@@ -34,10 +30,7 @@ class MemberController extends Controller
             ],
         ]);
 
-        $members = Member::with([
-            'category',
-            'level',
-        ])
+        $members = Member::with(['category', 'level'])
             ->when($filters['search'] ?? null, function ($query, $search) {
                 $query->where(function ($query) use ($search) {
                     $query
@@ -120,30 +113,72 @@ class MemberController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'first_name' => ['required', 'string', 'max:100'],
-            'last_name' => ['required', 'string', 'max:100'],
+            'first_name' => [
+                'required',
+                'string',
+                'max:100',
+            ],
+
+            'last_name' => [
+                'required',
+                'string',
+                'max:100',
+            ],
+
             'email' => [
                 'nullable',
                 'email',
                 'max:255',
                 'unique:members,email',
             ],
-            'phone' => ['nullable', 'string', 'max:30'],
-            'address' => ['nullable', 'string'],
-            'birth_date' => ['nullable', 'date'],
+
+            'phone' => [
+                'nullable',
+                'string',
+                'max:30',
+            ],
+
+            'address' => [
+                'nullable',
+                'string',
+            ],
+
+            'latitude' => [
+                'nullable',
+                'numeric',
+                'between:-90,90',
+            ],
+
+            'longitude' => [
+                'nullable',
+                'numeric',
+                'between:-180,180',
+            ],
+
+            'birth_date' => [
+                'nullable',
+                'date',
+            ],
+
             'membership_category_id' => [
                 'required',
                 'exists:membership_categories,id',
             ],
+
             'membership_level_id' => [
                 'required',
                 'exists:membership_levels,id',
             ],
+
             'status' => [
                 'required',
                 Rule::in(['Active', 'Inactive']),
             ],
-            'registered_at' => ['nullable', 'date'],
+
+            'registered_at' => [
+                'nullable',
+                'date',
+            ],
         ]);
 
         do {
@@ -166,7 +201,19 @@ class MemberController extends Controller
             ],
         ])->validate();
 
-        Member::create($validated);
+        $member = Member::create($validated);
+
+        if ($member->email) {
+            $member->load([
+                'category',
+                'level',
+            ]);
+
+            Notification::route('mail', $member->email)
+                ->notify(
+                    new MemberRegisteredNotification($member)
+                );
+        }
 
         return redirect()
             ->route('members.index')
@@ -205,8 +252,18 @@ class MemberController extends Controller
     public function update(Request $request, Member $member)
     {
         $validated = $request->validate([
-            'first_name' => ['required', 'string', 'max:100'],
-            'last_name' => ['required', 'string', 'max:100'],
+            'first_name' => [
+                'required',
+                'string',
+                'max:100',
+            ],
+
+            'last_name' => [
+                'required',
+                'string',
+                'max:100',
+            ],
+
             'email' => [
                 'nullable',
                 'email',
@@ -214,22 +271,54 @@ class MemberController extends Controller
                 Rule::unique('members', 'email')
                     ->ignore($member->id),
             ],
-            'phone' => ['nullable', 'string', 'max:30'],
-            'address' => ['nullable', 'string'],
-            'birth_date' => ['nullable', 'date'],
+
+            'phone' => [
+                'nullable',
+                'string',
+                'max:30',
+            ],
+
+            'address' => [
+                'nullable',
+                'string',
+            ],
+
+            'latitude' => [
+                'nullable',
+                'numeric',
+                'between:-90,90',
+            ],
+
+            'longitude' => [
+                'nullable',
+                'numeric',
+                'between:-180,180',
+            ],
+
+            'birth_date' => [
+                'nullable',
+                'date',
+            ],
+
             'membership_category_id' => [
                 'required',
                 'exists:membership_categories,id',
             ],
+
             'membership_level_id' => [
                 'required',
                 'exists:membership_levels,id',
             ],
+
             'status' => [
                 'required',
                 Rule::in(['Active', 'Inactive']),
             ],
-            'registered_at' => ['nullable', 'date'],
+
+            'registered_at' => [
+                'nullable',
+                'date',
+            ],
         ]);
 
         $member->update($validated);
