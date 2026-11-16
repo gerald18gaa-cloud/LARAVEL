@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+        content="width=device-width, initial-scale=1.0">
 
     <title>Login - Puihaha Membership</title>
 
@@ -38,11 +38,9 @@
             padding: 24px;
             color: var(--text);
             background:
-                radial-gradient(
-                    circle at top right,
+                radial-gradient(circle at top right,
                     rgba(153, 246, 228, 0.65),
-                    transparent 32%
-                ),
+                    transparent 32%),
                 linear-gradient(135deg, #f8fafc, #ecfeff);
             font-family: Arial, sans-serif;
         }
@@ -67,11 +65,9 @@
             padding: 48px;
             color: white;
             background:
-                linear-gradient(
-                    145deg,
+                linear-gradient(145deg,
                     rgba(15, 23, 42, 0.97),
-                    rgba(15, 118, 110, 0.96)
-                );
+                    rgba(15, 118, 110, 0.96));
         }
 
         .logo {
@@ -211,6 +207,33 @@
             font-size: 12px;
         }
 
+        .demo-login-box {
+            padding: 14px 16px;
+            margin-bottom: 22px;
+            border: 1px solid #99f6e4;
+            border-radius: 10px;
+            background: #f0fdfa;
+            color: #134e4a;
+            font-size: 13px;
+        }
+
+        .demo-login-box h3 {
+            margin: 0 0 8px;
+            color: #0f766e;
+            font-size: 15px;
+        }
+
+        .demo-login-box p {
+            margin: 5px 0;
+        }
+
+        .demo-login-box code {
+            padding: 3px 6px;
+            border-radius: 4px;
+            color: #172033;
+            background: white;
+        }
+
         @media (max-width: 700px) {
             body {
                 padding: 14px;
@@ -277,6 +300,22 @@
                     Sign in to access the administrator dashboard.
                 </p>
 
+                <div class="demo-login-box">
+                    <h3>Demo Admin Login</h3>
+
+                    <p>
+                        <strong>Email:</strong>
+                        <code>admin@example.com</code>
+                    </p>
+
+                    <p>
+                        <strong>Password:</strong>
+                        <code>Admin@12345</code>
+                    </p>
+
+                    <small>For professor evaluation only.</small>
+                </div>
+
                 @if (session('success'))
                     <div class="alert alert-success">
                         {{ session('success') }}
@@ -291,8 +330,7 @@
 
                 <form
                     action="{{ route('login.submit') }}"
-                    method="POST"
-                >
+                    method="POST">
                     @csrf
 
                     <div class="form-group">
@@ -305,8 +343,7 @@
                             value="{{ old('email') }}"
                             placeholder="Enter your email"
                             required
-                            autofocus
-                        >
+                            autofocus>
                     </div>
 
                     <div class="form-group">
@@ -317,14 +354,12 @@
                             id="password"
                             name="password"
                             placeholder="Enter your password"
-                            required
-                        >
+                            required>
                     </div>
 
                     <button
                         type="submit"
-                        class="login-button"
-                    >
+                        class="login-button">
                         Sign In
                     </button>
                 </form>
@@ -337,4 +372,5 @@
 
     </div>
 </body>
+
 </html>
